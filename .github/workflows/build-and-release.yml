@@ -31,7 +31,9 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: |
+            6.0.x
+            8.0.x
 
       - name: Restore
         run: dotnet restore
@@ -45,7 +47,7 @@ jobs:
       - name: Package mod for Mods folder
         run: |
           mkdir -p release/GMDFAutoDocumentationBuilder
-          cp src/GMDFAutoDocumentationBuilder/bin/Release/net8.0/GMDFAutoDocumentationBuilder.dll release/GMDFAutoDocumentationBuilder/
+          cp src/GMDFAutoDocumentationBuilder/bin/Release/net6.0/GMDFAutoDocumentationBuilder.dll release/GMDFAutoDocumentationBuilder/
           cp src/GMDFAutoDocumentationBuilder/manifest.json release/GMDFAutoDocumentationBuilder/
           cd release
           zip -r ../GMDFAutoDocumentationBuilder.zip GMDFAutoDocumentationBuilder
