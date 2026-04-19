@@ -1,7 +1,7 @@
 {
   "Name": "GMDF Auto Documentation Builder",
   "Author": "SilvertongueRED",
-  "Version": "1.0.2",
+  "Version": "1.0.3",
   "Description": "Automatically generates GMDF-compatible documentation.json files for installed mods.",
   "UniqueID": "SilvertongueRED.GMDFAutoDocumentationBuilder",
   "EntryDll": "GMDFAutoDocumentationBuilder.dll",
