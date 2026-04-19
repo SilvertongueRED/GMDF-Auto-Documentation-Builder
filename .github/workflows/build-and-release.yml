@@ -25,13 +25,13 @@ jobs:
             8.0.x
 
       - name: Restore
-        run: dotnet restore src/GMDFAutoDocumentationBuilder/GMDFAutoDocumentationBuilder.csproj
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build src/GMDFAutoDocumentationBuilder/GMDFAutoDocumentationBuilder.csproj -c Release --no-restore
+        run: dotnet build -c Release --no-restore
 
       - name: Test
-        run: dotnet test tests/GMDFAutoDocumentationBuilder.Tests/GMDFAutoDocumentationBuilder.Tests.csproj --verbosity normal
+        run: dotnet test -c Release --no-build --verbosity normal
 
       - name: Package mod for Mods folder
         run: |
