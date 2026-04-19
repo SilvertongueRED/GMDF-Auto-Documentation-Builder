@@ -5,13 +5,24 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for manual release (e.g. v1.0.0)'
+        required: true
+        type: string
 
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      COMMIT_SHA: ${{ github.sha }}
 
     steps:
       - name: Checkout
@@ -47,9 +58,46 @@ jobs:
           name: GMDFAutoDocumentationBuilder
           path: GMDFAutoDocumentationBuilder.zip
 
+      - name: Validate manual version input
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VERSION: ${{ env.RELEASE_TAG }}
+        run: |
+          if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
+            echo "Invalid version '$VERSION'. Expected format like v1.0.0."
+            exit 1
+          fi
+
+      - name: Create tag for manual release
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          VERSION: ${{ env.RELEASE_TAG }}
+        run: |
+          existing_sha="$(git ls-remote --tags origin "refs/tags/$VERSION^{}" | awk '{print $1}')"
+          if [ -z "$existing_sha" ]; then
+            existing_sha="$(git ls-remote --tags origin "refs/tags/$VERSION" | awk '{print $1}')"
+          fi
+
+          if [ -n "$existing_sha" ]; then
+            if [ "$existing_sha" != "$COMMIT_SHA" ]; then
+              echo "Tag '$VERSION' already exists on origin but points to '$existing_sha', not '$COMMIT_SHA'."
+              exit 1
+            fi
+            echo "Tag '$VERSION' already exists on origin and matches commit '$COMMIT_SHA'."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            echo "Creating tag '$VERSION' on commit '$COMMIT_SHA'."
+            git tag -a "$VERSION" "$COMMIT_SHA" -m "Release $VERSION" || { echo "Failed to create tag '$VERSION'."; exit 1; }
+            echo "Pushing tag '$VERSION' to origin."
+            git push origin "$VERSION" || { echo "Failed to push tag '$VERSION' to origin."; exit 1; }
+          fi
+
       - name: Create GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          target_commitish: ${{ env.COMMIT_SHA }}
           files: GMDFAutoDocumentationBuilder.zip
           generate_release_notes: true
