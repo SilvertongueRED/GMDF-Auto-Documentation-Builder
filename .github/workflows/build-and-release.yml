@@ -63,7 +63,7 @@ jobs:
         env:
           VERSION: ${{ env.RELEASE_TAG }}
         run: |
-          if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'; then
+          if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$'; then
             echo "Invalid version '$VERSION'. Expected format like v1.0.0."
             exit 1
           fi
@@ -73,8 +73,17 @@ jobs:
         env:
           VERSION: ${{ env.RELEASE_TAG }}
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
-            echo "Tag '$VERSION' already exists on origin."
+          existing_sha="$(git ls-remote --tags origin "refs/tags/$VERSION^{}" | awk '{print $1}')"
+          if [ -z "$existing_sha" ]; then
+            existing_sha="$(git ls-remote --tags origin "refs/tags/$VERSION" | awk '{print $1}')"
+          fi
+
+          if [ -n "$existing_sha" ]; then
+            if [ "$existing_sha" != "$COMMIT_SHA" ]; then
+              echo "Tag '$VERSION' already exists on origin but points to '$existing_sha', not '$COMMIT_SHA'."
+              exit 1
+            fi
+            echo "Tag '$VERSION' already exists on origin and matches commit '$COMMIT_SHA'."
           else
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
