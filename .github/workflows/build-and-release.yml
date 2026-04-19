@@ -88,7 +88,7 @@ jobs:
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             echo "Creating tag '$VERSION' on commit '$COMMIT_SHA'."
-            git tag "$VERSION" "$COMMIT_SHA" || { echo "Failed to create tag '$VERSION'."; exit 1; }
+            git tag -a "$VERSION" "$COMMIT_SHA" -m "Release $VERSION" || { echo "Failed to create tag '$VERSION'."; exit 1; }
             echo "Pushing tag '$VERSION' to origin."
             git push origin "$VERSION" || { echo "Failed to push tag '$VERSION' to origin."; exit 1; }
           fi
