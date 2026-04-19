@@ -12,70 +12,104 @@ namespace StardewModdingAPI
 
     public enum SButton
     {
-        None
+        None = 0
     }
 
     public static class Constants
     {
-        public static string ExecutionPath { get; set; } = AppContext.BaseDirectory;
+        public static string GamePath { get; set; } = AppContext.BaseDirectory;
     }
 
-    public interface IMonitor
+    public interface ISemanticVersion
     {
-        void Log(string message, LogLevel level = LogLevel.Debug);
     }
 
-    public interface IModManifest
+    public interface IManifest
     {
         string UniqueID { get; }
     }
 
-    public interface IConsoleCommandHelper
+    public interface IMonitor
     {
-        void Add(string name, string documentation, Action<string, string[]> callback);
+        void Log(string message, LogLevel level = LogLevel.Trace);
     }
 
-    public interface IGameLoopEvents
+    public interface IModLinked
     {
-        event EventHandler<Events.GameLaunchedEventArgs> GameLaunched;
+        string ModID { get; }
     }
 
-    public interface IInputEvents
+    public interface ICommandHelper : IModLinked
     {
-        event EventHandler<Events.ButtonPressedEventArgs> ButtonPressed;
+        ICommandHelper Add(string name, string documentation, Action<string, string[]> callback);
     }
 
-    public interface IEventHelper
+    public interface IModInfo
     {
-        IGameLoopEvents GameLoop { get; }
-        IInputEvents Input { get; }
     }
 
     public interface IModHelper
     {
         string DirectoryPath { get; }
-        IEventHelper Events { get; }
-        IConsoleCommandHelper ConsoleCommands { get; }
-        T ReadConfig<T>() where T : new();
+        Events.IModEvents Events { get; }
+        ICommandHelper ConsoleCommands { get; }
+        TConfig ReadConfig<TConfig>() where TConfig : class, new();
     }
 
-    public abstract class Mod
+    public interface IMod
     {
-        public IModHelper Helper { get; set; } = null!;
-        public IMonitor Monitor { get; set; } = null!;
-        public IModManifest ModManifest { get; set; } = null!;
+        IModHelper Helper { get; }
+        IMonitor Monitor { get; }
+        IManifest ModManifest { get; }
+        void Entry(IModHelper helper);
+        object? GetApi();
+        object? GetApi(IModInfo mod);
+    }
+
+    public abstract class Mod : IMod, IDisposable
+    {
+        public IModHelper Helper { get; internal set; } = null!;
+        public IMonitor Monitor { get; internal set; } = null!;
+        public IManifest ModManifest { get; internal set; } = null!;
 
         public abstract void Entry(IModHelper helper);
+
+        public virtual object? GetApi() => null;
+        public virtual object? GetApi(IModInfo mod) => null;
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing) { }
     }
 }
 
 namespace StardewModdingAPI.Events
 {
-    public sealed class GameLaunchedEventArgs : EventArgs
+    public interface IModEvents
+    {
+        IGameLoopEvents GameLoop { get; }
+        IInputEvents Input { get; }
+    }
+
+    public interface IGameLoopEvents
+    {
+        event EventHandler<GameLaunchedEventArgs> GameLaunched;
+    }
+
+    public interface IInputEvents
+    {
+        event EventHandler<ButtonPressedEventArgs> ButtonPressed;
+    }
+
+    public class GameLaunchedEventArgs : EventArgs
     {
     }
 
-    public sealed class ButtonPressedEventArgs : EventArgs
+    public class ButtonPressedEventArgs : EventArgs
     {
         public ButtonPressedEventArgs(StardewModdingAPI.SButton button)
         {

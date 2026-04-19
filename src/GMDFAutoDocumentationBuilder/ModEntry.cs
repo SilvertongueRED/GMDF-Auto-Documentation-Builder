@@ -16,7 +16,6 @@ public sealed class ModEntry : Mod
 
     public override void Entry(IModHelper helper)
     {
-        Helper = helper;
         _config = helper.ReadConfig<ModConfig>();
 
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
@@ -113,6 +112,6 @@ public sealed class ModEntry : Mod
         if (!string.IsNullOrWhiteSpace(parentDirectory) && Directory.Exists(parentDirectory))
             return parentDirectory;
 
-        return Path.Combine(Constants.ExecutionPath, "Mods");
+        return Path.Combine(Constants.GamePath, "Mods");
     }
 }
