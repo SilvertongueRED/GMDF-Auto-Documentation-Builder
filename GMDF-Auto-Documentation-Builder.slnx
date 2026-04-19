@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/GMDFAutoDocumentationBuilder/GMDFAutoDocumentationBuilder.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/GMDFAutoDocumentationBuilder.Tests/GMDFAutoDocumentationBuilder.Tests.csproj" />
+  </Folder>
+</Solution>
