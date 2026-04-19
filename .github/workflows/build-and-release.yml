@@ -22,6 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+      COMMIT_SHA: ${{ github.sha }}
 
     steps:
       - name: Checkout
@@ -75,8 +76,10 @@ jobs:
           if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
             echo "Tag '$VERSION' already exists on origin."
           else
-            echo "Creating tag '$VERSION' on commit '$GITHUB_SHA'."
-            git tag "$VERSION" "$GITHUB_SHA" || { echo "Failed to create tag '$VERSION'."; exit 1; }
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            echo "Creating tag '$VERSION' on commit '$COMMIT_SHA'."
+            git tag "$VERSION" "$COMMIT_SHA" || { echo "Failed to create tag '$VERSION'."; exit 1; }
             echo "Pushing tag '$VERSION' to origin."
             git push origin "$VERSION" || { echo "Failed to push tag '$VERSION' to origin."; exit 1; }
           fi
@@ -86,6 +89,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.RELEASE_TAG }}
-          target_commitish: ${{ github.sha }}
+          target_commitish: ${{ env.COMMIT_SHA }}
           files: GMDFAutoDocumentationBuilder.zip
           generate_release_notes: true
