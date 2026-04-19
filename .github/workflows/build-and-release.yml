@@ -20,6 +20,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
 
     steps:
       - name: Checkout
@@ -58,9 +60,9 @@ jobs:
       - name: Validate manual version input
         if: github.event_name == 'workflow_dispatch'
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.RELEASE_TAG }}
         run: |
-          if [[ ! "$VERSION" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$ ]]; then
+          if ! printf '%s\n' "$VERSION" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z]+)*$'; then
             echo "Invalid version '$VERSION'. Expected format like v1.0.0."
             exit 1
           fi
@@ -68,20 +70,22 @@ jobs:
       - name: Create tag for manual release
         if: github.event_name == 'workflow_dispatch'
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ env.RELEASE_TAG }}
         run: |
           if git ls-remote --exit-code --tags origin "refs/tags/$VERSION" >/dev/null 2>&1; then
             echo "Tag '$VERSION' already exists on origin."
           else
-            git tag "$VERSION" "$GITHUB_SHA"
-            git push origin "$VERSION"
+            echo "Creating tag '$VERSION' on commit '$GITHUB_SHA'."
+            git tag "$VERSION" "$GITHUB_SHA" || { echo "Failed to create tag '$VERSION'."; exit 1; }
+            echo "Pushing tag '$VERSION' to origin."
+            git push origin "$VERSION" || { echo "Failed to push tag '$VERSION' to origin."; exit 1; }
           fi
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.version || github.ref_name }}
+          tag_name: ${{ env.RELEASE_TAG }}
           target_commitish: ${{ github.sha }}
           files: GMDFAutoDocumentationBuilder.zip
           generate_release_notes: true
