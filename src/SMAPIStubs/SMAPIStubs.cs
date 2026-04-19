@@ -20,15 +20,6 @@ namespace StardewModdingAPI
         public static string GamePath { get; set; } = AppContext.BaseDirectory;
     }
 
-    public interface ISemanticVersion
-    {
-    }
-
-    public interface IManifest
-    {
-        string UniqueID { get; }
-    }
-
     public interface IMonitor
     {
         void Log(string message, LogLevel level = LogLevel.Trace);

@@ -2,14 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <AssemblyName>StardewModdingAPI</AssemblyName>
+    <AssemblyName>SMAPI.Toolkit.CoreInterfaces</AssemblyName>
     <RootNamespace>StardewModdingAPI</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\SMAPIToolkitCoreInterfacesStubs\SMAPIToolkitCoreInterfacesStubs.csproj" />
-  </ItemGroup>
 
 </Project>
