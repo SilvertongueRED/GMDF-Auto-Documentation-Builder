@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/GMDFAutoDocumentationBuilder/GMDFAutoDocumentationBuilder.csproj" />
     <Project Path="src/SMAPIStubs/SMAPIStubs.csproj" />
+    <Project Path="src/SMAPIToolkitCoreInterfacesStubs/SMAPIToolkitCoreInterfacesStubs.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/GMDFAutoDocumentationBuilder.Tests/GMDFAutoDocumentationBuilder.Tests.csproj" />

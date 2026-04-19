@@ -16,6 +16,9 @@
     <ProjectReference Include="..\SMAPIStubs\SMAPIStubs.csproj">
       <Private>false</Private>
     </ProjectReference>
+    <ProjectReference Include="..\SMAPIToolkitCoreInterfacesStubs\SMAPIToolkitCoreInterfacesStubs.csproj">
+      <Private>false</Private>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
