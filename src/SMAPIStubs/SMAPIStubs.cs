@@ -45,6 +45,7 @@ namespace StardewModdingAPI
         Events.IModEvents Events { get; }
         ICommandHelper ConsoleCommands { get; }
         TConfig ReadConfig<TConfig>() where TConfig : class, new();
+        void WriteConfig<TConfig>(TConfig config) where TConfig : class;
     }
 
     public interface IMod
