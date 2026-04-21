@@ -14,7 +14,9 @@ A Stardew Valley SMAPI mod that scans installed mods and generates GMDF-compatib
 {
   "ScanOnLaunch": true,
   "BuildKeybind": "None",
-  "NexusApiKey": ""
+  "NexusApiKey": "",
+  "RescanRetryCount": 1,
+  "EnableErrorLog": true
 }
 ```
 
