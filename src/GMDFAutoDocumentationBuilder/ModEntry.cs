@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using GMDFAutoDocumentationBuilder.Models;
 using GMDFAutoDocumentationBuilder.Services;
 using StardewModdingAPI;
@@ -11,6 +12,7 @@ public sealed class ModEntry : Mod
     private readonly ManifestScanner _scanner = new();
     private readonly NexusMetadataProvider _nexus = new();
     private readonly DocumentationBuilder _documentationBuilder = new();
+    private readonly ImageDownloader _imageDownloader = new();
     private readonly ErrorLogger _errorLogger = new();
 
     private ModConfig _config = new();
@@ -89,7 +91,8 @@ public sealed class ModEntry : Mod
 
         var options = new JsonSerializerOptions
         {
-            WriteIndented = true
+            WriteIndented = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         var manifestsToProcess = manifests
@@ -139,7 +142,10 @@ public sealed class ModEntry : Mod
         try
         {
             var nexus = await _nexus.FetchAsync(manifest, _config.NexusApiKey, Monitor, CancellationToken.None).ConfigureAwait(false);
-            var document = _documentationBuilder.Build(manifest, nexus);
+
+            var localBannerPath = await TryDownloadBannerAsync(manifest.DirectoryPath, nexus.PictureUrl).ConfigureAwait(false);
+
+            var document = _documentationBuilder.Build(manifest, nexus, localBannerPath);
 
             var outputPath = Path.Combine(manifest.DirectoryPath, "documentation.json");
             var outputJson = JsonSerializer.Serialize(document, options);
@@ -154,6 +160,20 @@ public sealed class ModEntry : Mod
             Monitor.Log($"Failed to generate documentation for '{manifest.Name}' in '{manifest.DirectoryPath}' (attempt {attempt}): {ex.Message}", LogLevel.Warn);
             return false;
         }
+    }
+
+    private async Task<string?> TryDownloadBannerAsync(string modDirectory, string? pictureUrl)
+    {
+        if (string.IsNullOrWhiteSpace(pictureUrl))
+            return null;
+
+        // Use a fixed relative path so the texture reference in documentation.json
+        // stays consistent across re-runs.
+        const string relativeAssetPath = "assets/gmdf_banner.jpg";
+        var absolutePath = Path.Combine(modDirectory, relativeAssetPath);
+
+        var downloaded = await _imageDownloader.TryDownloadAsync(pictureUrl, absolutePath, CancellationToken.None).ConfigureAwait(false);
+        return downloaded ? relativeAssetPath : null;
     }
 
     private string ResolveModsDirectory()
