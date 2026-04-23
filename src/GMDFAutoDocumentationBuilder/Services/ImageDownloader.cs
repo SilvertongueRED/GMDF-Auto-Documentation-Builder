@@ -34,6 +34,10 @@ public sealed class ImageDownloader
         }
         catch
         {
+            // Banner images are optional — if the download fails for any reason
+            // (network error, invalid URL, permission issue, etc.) we silently
+            // skip the headerImage rather than failing the whole documentation
+            // generation run for the mod.
             return false;
         }
     }

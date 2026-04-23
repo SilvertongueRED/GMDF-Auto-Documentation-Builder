@@ -16,7 +16,7 @@ public sealed class NexusMetadataProvider
     private static readonly Regex HtmlListItemRegex = new("<li[^>]*>(.*?)</li>", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
     private static readonly Regex HtmlTagRegex = new("<[^>]+>", RegexOptions.Compiled);
     private static readonly Regex WhitespaceRegex = new("\\s+", RegexOptions.Compiled);
-    private static readonly Regex BbCodeListItemRegex = new(@"\[\*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static readonly Regex BbCodeListItemRegex = new(@"\[\*\]", RegexOptions.Compiled);
     private static readonly Regex BbCodeHrRegex = new(@"\[hr\]|\[rule\]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     private static readonly Regex BbCodeTagRegex = new(@"\[/?[a-zA-Z][^\]]*\]", RegexOptions.Compiled);
     private static readonly Regex MultipleNewlineRegex = new(@"\n{3,}", RegexOptions.Compiled);

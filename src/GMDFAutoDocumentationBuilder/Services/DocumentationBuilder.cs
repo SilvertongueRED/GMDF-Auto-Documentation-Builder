@@ -293,6 +293,11 @@ public sealed record GifEntry(
     public string Type => "gif";
 }
 
+/// <summary>
+/// A two-column layout entry. Either or both of <see cref="Left"/> and
+/// <see cref="Right"/> may be <c>null</c>; the GMDF schema treats both
+/// columns as optional so a row can contain content on one side only.
+/// </summary>
 public sealed record RowEntry(
     [property: JsonPropertyName("left")] IReadOnlyList<object>? Left,
     [property: JsonPropertyName("right")] IReadOnlyList<object>? Right,
